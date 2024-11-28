@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;      // Necesario para manejar archivos
 
 public class MainManager : MonoBehaviour
 {
@@ -74,3 +75,4 @@ public class MainManager : MonoBehaviour
         GameOverText.SetActive(true);
     }
 }
+
