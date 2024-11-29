@@ -4,31 +4,33 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 
 
 public class SaveDataScript : MonoBehaviour
 {
-    public TMP_InputField inputField;  // Asigna el InputField TMP desde el Inspector
-    public Button saveButton;          // Asigna el botón para guardar el texto
-    public Transform contentPanel;     // El panel del ScrollView donde se agregarán los elementos
-    public GameObject itemPrefab;      // Prefab para mostrar el texto y el número
+    
 
-    private int currentNumber = 0;     // El número que acompañará el texto (inicia en 0)
+    public TMP_InputField inputField;
+    public Button saveButton;
+    public Transform contentPanel;
+    public GameObject itemPrefab;
 
-    // Lista para almacenar los datos
+    private int currentNumber = 0;
     private List<TextAndNumber> savedTexts = new List<TextAndNumber>();
+    private string filePath;
+    private string scorePath;
 
-    private string filePath;           // Ruta del archivo JSON
+    private int currentScore = 0;
 
     void Start()
     {
-        filePath = Application.persistentDataPath + "/savedData.json";  // Ruta para guardar el archivo JSON
-
+        filePath = Application.persistentDataPath + "/savedData2.json";
         saveButton.onClick.AddListener(OnSaveButtonClick);
-
-        // Cargar los datos guardados al iniciar
         LoadDataFromJSON();
+        LoadBestScore(currentScore);
+        scorePath = Application.persistentDataPath + "/savedBestScore.json";
     }
 
     // Método para manejar la acción del botón
@@ -36,25 +38,26 @@ public class SaveDataScript : MonoBehaviour
     {
         // Obtén el texto ingresado
         string enteredText = inputField.text;
-
+        
         // Agrega el texto a la lista junto con el número actual
-        savedTexts.Add(new TextAndNumber(enteredText, currentNumber));
+        savedTexts.Add(new TextAndNumber(enteredText, currentScore));
 
         // Crear un nuevo item en el ScrollView
-        CreateItem(enteredText, currentNumber);
-
+        CreateItem(enteredText, currentScore);
+        Debug.Log("Mejor puntuacion: "+currentScore);
         // Incrementar el número para el siguiente item
-        currentNumber++;
+        currentNumber = currentScore;
 
         // Guardar los datos en el archivo JSON
         SaveDataToJSON();
 
         // Limpiar el InputField
         inputField.text = "";
+        SceneManager.LoadScene(1);
     }
 
     // Método para crear un item en el ScrollView
-    private void CreateItem(string text, int number)
+    public void CreateItem(string text, int number)
     {
         // Instancia el prefab que mostrará el texto y el número
         GameObject newItem = Instantiate(itemPrefab, contentPanel);
@@ -68,7 +71,7 @@ public class SaveDataScript : MonoBehaviour
     }
 
     // Método para guardar los datos en un archivo JSON
-    private void SaveDataToJSON()
+    public void SaveDataToJSON()
     {
         string json = JsonUtility.ToJson(new SaveData(savedTexts));
         File.WriteAllText(filePath, json);
@@ -102,6 +105,37 @@ public class SaveDataScript : MonoBehaviour
             savedTexts = new List<TextAndNumber>();
         }
     }
+    private void LoadBestScore(int score)
+    {
+        // Verificar si el archivo existe
+        if (File.Exists(scorePath))
+        {
+            // Leer el contenido del archivo JSON
+            string json = File.ReadAllText(scorePath);
+
+            // Deserializar el JSON a un objeto ScoreData
+            ScoreData data = JsonUtility.FromJson<ScoreData>(json);
+            currentScore = data.score;
+            // Actualizar el texto del mejor puntaje
+
+            Debug.Log("Mejor puntaje cargado: " + data.score);
+        }
+        else
+        {
+            // Si no existe, mostrar un valor predeterminado   
+            Debug.Log("No se encontró un puntaje guardado.");
+        }
+    }
+
+    public void ClearJsonFile()
+    {
+        currentNumber = 0;  
+        savedTexts.Clear(); // Borra todos los elementos de la lista
+
+        // Guardar los datos vacíos en el archivo JSON
+        SaveDataToJSON();
+    }
+
 
     // Clase para almacenar los datos (texto y número)
     [System.Serializable]
@@ -126,6 +160,16 @@ public class SaveDataScript : MonoBehaviour
         public SaveData(List<TextAndNumber> textAndNumbers)
         {
             this.textAndNumbers = textAndNumbers;
+        }
+    }
+    [System.Serializable]
+    public class ScoreData
+    {
+        public int score;
+
+        public ScoreData(int score)
+        {
+            this.score = score;
         }
     }
 }

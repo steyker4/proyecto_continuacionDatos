@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 
 public class MenuOptions : MonoBehaviour
 {
+    private MainManager mainManager;
+    private SaveDataScript script;
     // Start is called before the first frame update
     public void NewGame()
     {
@@ -17,7 +19,11 @@ public class MenuOptions : MonoBehaviour
     {
         SceneManager.LoadScene(2);
     }
-   public void Exit()
+    public void Back()
+    {
+        SceneManager.LoadScene(0);
+    }
+    public void Exit()
     {
 #if UNITY_EDITOR
        EditorApplication.ExitPlaymode();

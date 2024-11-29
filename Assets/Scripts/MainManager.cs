@@ -19,7 +19,11 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+    public BestScore bestScoreManager;
+
+
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -67,6 +71,17 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+
+        bestScoreManager.UpdateScore(point);
+    }
+    public int getPoints()
+    {
+        int points =0;
+        if(m_GameOver==true)
+        {
+            points = m_Points;
+        }
+        return points;
     }
 
     public void GameOver()
